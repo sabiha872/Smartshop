@@ -1,51 +1,26 @@
-import { useState } from "react";
-import axios from "axios";
+import { Link } from "react-router-dom";
 
 function Login() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const loginUser = async (e) => {
-    e.preventDefault();
-
-    try {
-      const { data } = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        form
-      );
-
-      localStorage.setItem("user", JSON.stringify(data));
-      alert("Login successful");
-      window.location.href = "/products";
-    } catch (error) {
-      alert(error.response?.data?.message || "Login failed");
-    }
-  };
-
   return (
-    <div className="p-10">
-      <h1>Login</h1>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>Welcome Back</h1>
+        <p>Login to continue shopping smartly.</p>
 
-      <form onSubmit={loginUser}>
-        <input name="email" placeholder="Email" onChange={handleChange} />
-        <br /><br />
+        <form className="auth-form">
+          <label>Email Address</label>
+          <input type="email" placeholder="Enter your email" />
 
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          onChange={handleChange}
-        />
-        <br /><br />
+          <label>Password</label>
+          <input type="password" placeholder="Enter your password" />
 
-        <button type="submit">Login</button>
-      </form>
+          <button type="submit">Login</button>
+        </form>
+
+        <p className="auth-switch">
+          Don&apos;t have an account? <Link to="/register">Register</Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,55 +1,32 @@
-import { useState } from "react";
-import axios from "axios";
+import { Link } from "react-router-dom";
 
 function Register() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const registerUser = async (e) => {
-    e.preventDefault();
-
-    try {
-      const { data } = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        form
-      );
-
-      localStorage.setItem("user", JSON.stringify(data));
-      alert("Register successful");
-      window.location.href = "/products";
-    } catch (error) {
-      alert(error.response?.data?.message || "Register failed");
-    }
-  };
-
   return (
-    <div className="p-10">
-      <h1>Register</h1>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>Create Account</h1>
+        <p>Join Ayaana Ka Khajana and find best deals.</p>
 
-      <form onSubmit={registerUser}>
-        <input name="name" placeholder="Name" onChange={handleChange} />
-        <br /><br />
+        <form className="auth-form">
+          <label>Full Name</label>
+          <input type="text" placeholder="Enter your name" />
 
-        <input name="email" placeholder="Email" onChange={handleChange} />
-        <br /><br />
+          <label>Email Address</label>
+          <input type="email" placeholder="Enter your email" />
 
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          onChange={handleChange}
-        />
-        <br /><br />
+          <label>Password</label>
+          <input type="password" placeholder="Create password" />
 
-        <button type="submit">Register</button>
-      </form>
+          <label>Confirm Password</label>
+          <input type="password" placeholder="Confirm password" />
+
+          <button type="submit">Register</button>
+        </form>
+
+        <p className="auth-switch">
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
+      </div>
     </div>
   );
 }

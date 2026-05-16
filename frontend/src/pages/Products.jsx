@@ -1,83 +1,53 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useContext, useState } from "react";
+import { CartContext } from "../context/CartContext";
 
 function Products() {
-  const [products, setProducts] = useState([]);
- const addToCart = (product) => {
-  const oldCart = JSON.parse(localStorage.getItem("cart")) || [];
-  const existing = oldCart.find((item) => item._id === product._id);
+  const { addToCart, products, addToWishlist } = useContext(CartContext);
+  const [search, setSearch] = useState("");
 
-  let updatedCart;
-
-  if (existing) {
-    updatedCart = oldCart.map((item) =>
-      item._id === product._id
-        ? { ...item, quantity: item.quantity + 1 }
-        : item
-    );
-  } else {
-    updatedCart = [...oldCart, { ...product, quantity: 1 }];
-  }
-
-  localStorage.setItem("cart", JSON.stringify(updatedCart));
-  alert("Product added to cart");
-};
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const { data } = await axios.get(
-        "http://localhost:5000/api/products"
-      );
-
-      setProducts(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const filteredProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const getLowestPrice = (p) => Math.min(p.amazon, p.flipkart, p.meesho);
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="products-page">
       <h1>Products</h1>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3,1fr)",
-          gap: "20px",
-        }}
-      >
-        {products.map((product) => (
-          <div
-            key={product._id}
-            style={{
-              border: "1px solid gray",
-              padding: "15px",
-              borderRadius: "10px",
-            }}
-          >
-            <img
-              src={product.image}
-              alt={product.name}
-              style={{
-                width: "100%",
-                height: "200px",
-                objectFit: "cover",
-              }}
-            />
+      <p>Compare prices and choose the cheapest one.</p>
 
-            <h2>{product.name}</h2>
+      <div className="search-box">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
-            <p>{product.description}</p>
+      <div className="products-grid">
+        {filteredProducts.map((p) => (
+          <div className="product-card" key={p.id}>
+            <img src={p.image} alt={p.name} />
 
-            <h3>₹ {product.price}</h3>
-<button
-  onClick={() => addToCart(product)}
-  className="mt-5 bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800"
+            <div className="category">{p.category}</div>
+
+            <h3>{p.name}</h3>
+
+            <div className="price-box">
+              <p>Amazon: ₹{p.amazon}</p>
+              <p>Flipkart: ₹{p.flipkart}</p>
+              <p>Meesho: ₹{p.meesho}</p>
+            </div>
+
+            <h4>Lowest Price: ₹{getLowestPrice(p)}</h4>
+
+            <button onClick={() => addToCart(p)}>Add To Cart</button>
+            <button
+  className="wishlist-btn"
+  onClick={() => addToWishlist(p)}
 >
-  Add To Cart
+  ❤️ Add To Wishlist
 </button>
           </div>
         ))}

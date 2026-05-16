@@ -1,93 +1,50 @@
-import { useEffect, useState } from "react";
+import { useContext } from "react";
+import { CartContext } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
-  const [cart, setCart] = useState([]);
+  const { cart, removeFromCart, placeOrder } = useContext(CartContext);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(savedCart);
-  }, []);
+  const getLowestPrice = (item) => Math.min(item.amazon, item.flipkart, item.meesho);
 
-  const removeItem = (id) => {
-    const updatedCart = cart.filter((item) => item._id !== id);
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  const totalPrice = cart.reduce((total, item) => total + getLowestPrice(item), 0);
+
+  const handleCheckout = () => {
+    placeOrder();
+    navigate("/my-orders");
   };
 
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-   const placeOrder = async () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  if (!user) {
-    alert("Please login first");
-    window.location.href = "/login";
-    return;
-  }
-
-  const orderItems = cart.map((item) => ({
-    name: item.name,
-    quantity: item.quantity,
-    image: item.image,
-    price: item.price,
-    product: item._id,
-  }));
-
-  const res = await fetch("http://localhost:5000/api/orders", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      user: user._id,
-      orderItems,
-      totalPrice: total,
-    }),
-  });
-
-  if (res.ok) {
-    localStorage.removeItem("cart");
-    setCart([]);
-    alert("Order placed successfully");
-  }
-};
   return (
-    <div className="p-10 min-h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold mb-8">Your Cart 🛒</h1>
+    <div className="cart-page">
+      <h1>My Cart 🛒</h1>
 
       {cart.length === 0 ? (
-        <p>No products in cart.</p>
+        <p className="empty-cart">Your cart is empty.</p>
       ) : (
-        <div className="space-y-5">
-          {cart.map((item) => (
-            <div
-              key={item._id}
-              className="bg-white p-5 rounded-xl shadow flex justify-between items-center"
-            >
-              <div>
-                <h2 className="text-xl font-bold">{item.name}</h2>
-                <p>₹{item.price} × {item.quantity}</p>
+        <>
+          <div className="products-grid">
+            {cart.map((item, index) => (
+              <div className="product-card" key={index}>
+                <img src={item.image} alt={item.name} />
+                <h3>{item.name}</h3>
+                <h4>Lowest Price: ₹{getLowestPrice(item)}</h4>
+
+                <button
+                  className="remove-btn"
+                  onClick={() => removeFromCart(index)}
+                >
+                  Remove
+                </button>
               </div>
+            ))}
+          </div>
 
-              <button
-                onClick={() => removeItem(item._id)}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg"
-              >
-                Remove
-              </button>
-              <button
-  onClick={placeOrder}
-  className="bg-green-600 text-white px-6 py-3 rounded-lg mt-5"
->
-  Place Order
-</button>
-            </div>
-          ))}
-
-          <h2 className="text-3xl font-bold">Total: ₹{total}</h2>
-        </div>
+          <div className="cart-summary">
+            <h2>Total Amount: ₹{totalPrice}</h2>
+            <button onClick={handleCheckout}>Checkout</button>
+          </div>
+        </>
       )}
     </div>
   );
