@@ -11,7 +11,6 @@ import "react-toastify/dist/ReactToastify.css";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <CartProvider>
-
       <App />
 
       <ToastContainer
@@ -19,7 +18,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         autoClose={2000}
         theme="dark"
       />
-
     </CartProvider>
   </React.StrictMode>
 );

@@ -2,29 +2,22 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    orderItems: [
+    items: [
       {
         name: String,
-        quantity: Number,
         image: String,
         price: Number,
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-        },
+        qty: Number,
       },
     ],
-    totalPrice: {
-      type: Number,
-      required: true,
+    totalAmount: Number,
+    paymentMethod: {
+      type: String,
+      default: "Cash on Delivery",
     },
     status: {
       type: String,
-      default: "Processing",
+      default: "Placed",
     },
   },
   { timestamps: true }

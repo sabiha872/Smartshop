@@ -1,52 +1,20 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export const CartContext = createContext();
 
-const defaultProducts = [
-  {
-    id: 1,
-    name: "Wireless Headphones",
-    category: "Electronics",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
-    amazon: 1499,
-    flipkart: 1399,
-    meesho: 1299,
-  },
-  {
-    id: 2,
-    name: "Smart Watch",
-    category: "Electronics",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
-    amazon: 1999,
-    flipkart: 1899,
-    meesho: 1799,
-  },
-  {
-    id: 3,
-    name: "Bluetooth Speaker",
-    category: "Electronics",
-    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1",
-    amazon: 999,
-    flipkart: 899,
-    meesho: 799,
-  },
-  {
-    id: 4,
-    name: "Laptop Backpack",
-    category: "Fashion",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62",
-    amazon: 799,
-    flipkart: 699,
-    meesho: 599,
-  },
-];
+function getCheapestPrice(product) {
+  const prices = product.prices || {
+    amazon: product.amazon,
+    flipkart: product.flipkart,
+    meesho: product.meesho,
+  };
+
+  const validPrices = Object.values(prices || {}).filter((p) => Number(p) > 0);
+  return validPrices.length ? Math.min(...validPrices.map(Number)) : 0;
+}
 
 function CartProvider({ children }) {
-  const [products, setProducts] = useState(() => {
-    return JSON.parse(localStorage.getItem("products")) || defaultProducts;
-  });
-
   const [cart, setCart] = useState(() => {
     return JSON.parse(localStorage.getItem("cart")) || [];
   });
@@ -60,10 +28,6 @@ function CartProvider({ children }) {
   });
 
   useEffect(() => {
-    localStorage.setItem("products", JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
@@ -75,23 +39,60 @@ function CartProvider({ children }) {
     localStorage.setItem("wishlist", JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const addProduct = (product) => {
-    setProducts([...products, { ...product, id: Date.now() }]);
-    toast.success("Product Added Successfully ✅");
-  };
+  const getProductId = (product) => product._id || product.id;
 
   const addToCart = (product) => {
-    setCart([...cart, product]);
-    toast.success("Added To Cart 🛒");
+    const productId = getProductId(product);
+
+    const existingItem = cart.find((item) => getProductId(item) === productId);
+
+    if (existingItem) {
+      setCart(
+        cart.map((item) =>
+          getProductId(item) === productId
+            ? { ...item, qty: item.qty + 1 }
+            : item
+        )
+      );
+      toast.info("Quantity increased 🛒");
+    } else {
+      setCart([...cart, { ...product, qty: 1 }]);
+      toast.success("Added To Cart 🛒");
+    }
   };
 
-  const removeFromCart = (index) => {
-    setCart(cart.filter((_, i) => i !== index));
+  const increaseQty = (id) => {
+  setCart(
+    cart.map((item) =>
+      (item._id || item.id) === id
+        ? { ...item, qty: item.qty + 1 }
+        : item
+    )
+  );
+};
+
+const decreaseQty = (id) => {
+  setCart(
+    cart.map((item) =>
+      (item._id || item.id) === id && item.qty > 1
+        ? { ...item, qty: item.qty - 1 }
+        : item
+    )
+  );
+};
+
+  const removeFromCart = (id) => {
+    setCart(cart.filter((item) => getProductId(item) !== id));
     toast.error("Removed From Cart ❌");
   };
 
+  const clearCart = () => {
+    setCart([]);
+  };
+
   const addToWishlist = (product) => {
-    const alreadyAdded = wishlist.find((item) => item.id === product.id);
+    const productId = getProductId(product);
+    const alreadyAdded = wishlist.find((item) => getProductId(item) === productId);
 
     if (alreadyAdded) {
       toast.info("Already in Wishlist ❤️");
@@ -103,16 +104,27 @@ function CartProvider({ children }) {
   };
 
   const removeFromWishlist = (id) => {
-    setWishlist(wishlist.filter((item) => item.id !== id));
+    setWishlist(wishlist.filter((item) => getProductId(item) !== id));
     toast.error("Removed from Wishlist");
   };
 
-  const placeOrder = () => {
-    if (cart.length === 0) return;
+  const placeOrder = (paymentMethod = "Cash on Delivery") => {
+    if (cart.length === 0) {
+      toast.error("Cart is empty");
+      return;
+    }
+
+    const total = cart.reduce(
+      (sum, item) => sum + getCheapestPrice(item) * item.qty,
+      0
+    );
 
     const newOrder = {
       id: Date.now(),
       items: cart,
+      total,
+      paymentMethod,
+      status: "Placed",
       date: new Date().toLocaleDateString(),
     };
 
@@ -124,16 +136,18 @@ function CartProvider({ children }) {
   return (
     <CartContext.Provider
       value={{
-        products,
         cart,
         orders,
         wishlist,
-        addProduct,
         addToCart,
+        increaseQty,
+        decreaseQty,
         removeFromCart,
+        clearCart,
         placeOrder,
         addToWishlist,
         removeFromWishlist,
+        getCheapestPrice,
       }}
     >
       {children}
@@ -141,4 +155,5 @@ function CartProvider({ children }) {
   );
 }
 
+export const useCart = () => useContext(CartContext);
 export default CartProvider;

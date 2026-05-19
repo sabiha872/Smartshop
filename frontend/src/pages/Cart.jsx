@@ -3,15 +3,26 @@ import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
 function Cart() {
-  const { cart, removeFromCart, placeOrder } = useContext(CartContext);
+  const {
+    cart,
+    removeFromCart,
+    increaseQty,
+    decreaseQty,
+    placeOrder,
+    getCheapestPrice,
+  } = useContext(CartContext);
+
   const navigate = useNavigate();
 
-  const getLowestPrice = (item) => Math.min(item.amazon, item.flipkart, item.meesho);
+  const getProductId = (item) => item._id || item.id;
 
-  const totalPrice = cart.reduce((total, item) => total + getLowestPrice(item), 0);
+  const totalPrice = cart.reduce(
+    (total, item) => total + getCheapestPrice(item) * item.qty,
+    0
+  );
 
   const handleCheckout = () => {
-    placeOrder();
+    placeOrder("Cash on Delivery");
     navigate("/my-orders");
   };
 
@@ -24,25 +35,38 @@ function Cart() {
       ) : (
         <>
           <div className="products-grid">
-            {cart.map((item, index) => (
-              <div className="product-card" key={index}>
-                <img src={item.image} alt={item.name} />
-                <h3>{item.name}</h3>
-                <h4>Lowest Price: ₹{getLowestPrice(item)}</h4>
+            {cart.map((item) => {
+              const itemId = getProductId(item);
 
-                <button
-                  className="remove-btn"
-                  onClick={() => removeFromCart(index)}
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
+              return (
+                <div className="product-card" key={itemId}>
+                  <img src={item.image} alt={item.name} />
+
+                  <h3>{item.name}</h3>
+                  <h4>Price: ₹{getCheapestPrice(item)}</h4>
+
+                  <div className="qty-box">
+                    <button onClick={() => decreaseQty(itemId)}>-</button>
+                    <span>{item.qty}</span>
+                    <button onClick={() => increaseQty(itemId)}>+</button>
+                  </div>
+
+                  <h4>Subtotal: ₹{getCheapestPrice(item) * item.qty}</h4>
+
+                  <button
+                    className="remove-btn"
+                    onClick={() => removeFromCart(itemId)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
           <div className="cart-summary">
             <h2>Total Amount: ₹{totalPrice}</h2>
-            <button onClick={handleCheckout}>Checkout</button>
+           <button onClick={() => navigate("/checkout")}>Checkout</button>
           </div>
         </>
       )}

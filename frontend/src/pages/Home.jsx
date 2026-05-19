@@ -3,72 +3,78 @@ import { Link } from "react-router-dom";
 function Home() {
   return (
     <div className="home">
+      <section className="hero new-hero">
+        <div className="hero-content">
+          <div className="badge">⭐ Best Deals • Fast Shopping • Trusted Store</div>
 
-      <section className="hero">
+          <h1>SmartShop 🛍️</h1>
 
-        <div className="badge">
-          ⭐ Best Prices • Trusted by Shoppers
+          <p className="subtitle">
+            Discover electronics, fashion, beauty, home essentials and more.
+            Compare prices, add to cart and shop smarter.
+          </p>
+
+          <div className="hero-buttons">
+            <Link to="/products" className="start-btn">
+              🛒 Start Shopping
+            </Link>
+
+            <Link to="/contact" className="outline-btn">
+              Contact Us
+            </Link>
+          </div>
+
+          <div className="hero-points">
+            <span>🛡️ Secure Shopping</span>
+            <span>🚚 Fast Delivery</span>
+            <span>💳 Easy Payment</span>
+          </div>
         </div>
 
-        <h1>
-          Ayaana Ka Khajana 🛍️
-        </h1>
-
-        <p className="subtitle">
-          Amazon, Flipkart aur Meesho ke prices compare
-          karke cheapest product find karo.
-        </p>
-
-        <Link to="/products" className="start-btn">
-          🛒 Start Shopping →
-        </Link>
-
-        <div className="hero-points">
-          <span>🛡️ Best Price Guarantee</span>
-          <span>⏱️ Save Time & Money</span>
-          <span>✅ 100% Trusted</span>
+        <div className="hero-image">
+          <img
+            src="https://images.unsplash.com/photo-1607082349566-187342175e2f"
+            alt="SmartShop shopping"
+          />
         </div>
-
       </section>
 
       <section className="features">
-
-        <h2>Why Choose Us?</h2>
+        <h2>Why Choose SmartShop?</h2>
 
         <div className="feature-grid">
-
           <div className="feature-card">
-            <h3>🏷️ Price Compare</h3>
-            <p>
-              Amazon, Flipkart aur Meesho ke prices compare karo.
-            </p>
+            <h3>🏷️ Best Price Compare</h3>
+            <p>Amazon, Flipkart aur Meesho ke prices compare karo.</p>
           </div>
 
           <div className="feature-card">
-            <h3>⚡ Save More</h3>
-            <p>
-              Lowest price find karke har product par paisa bachao.
-            </p>
+            <h3>🛒 Easy Cart</h3>
+            <p>Add to cart, quantity change aur checkout simple hai.</p>
           </div>
 
           <div className="feature-card">
-            <h3>🛡️ Trusted Platform</h3>
-            <p>
-              Reliable sources se price comparison milega.
-            </p>
+            <h3>📦 Order Tracking</h3>
+            <p>My Orders page par apne orders check karo.</p>
           </div>
 
           <div className="feature-card">
-            <h3>🛒 Easy Shopping</h3>
-            <p>
-              Search, compare aur best deal quickly choose karo.
-            </p>
+            <h3>❤️ Wishlist</h3>
+            <p>Apne favourite products wishlist me save karo.</p>
           </div>
-
         </div>
-
       </section>
 
+      <section className="contact-section">
+        <h2>Contact Us</h2>
+        <p>Need help? SmartShop support is always ready.</p>
+
+        <div className="contact-box">
+          <p>📧 Email: sk419110@gmail.com</p>
+          <p>📞 Phone: +91 6266709084</p>
+          <p>📍 Location: India</p>
+        </div>
+      </section>
     </div>
   );
 }
